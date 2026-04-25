@@ -1,0 +1,26 @@
+{
+  "name": "library-server",
+  "version": "1.0.0",
+  "description": "Libry web-server",
+  "homepage": "https://github.com/MintaDuku/Library-Server#readme",
+  "bugs": {
+    "url": "https://github.com/MintaDuku/Library-Server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MintaDuku/Library-Server.git"
+  },
+  "license": "ISC",
+  "author": "Minta-Serafini",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mongodb": "^7.2.0"
+  }
+}
