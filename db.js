@@ -9,7 +9,7 @@ export default async function connectDB(){
     if(!db){
         await client.connect();
 
-        console.log("Connected to MoengoDB");
+        console.log("Connected to MongoDB");
 
         db = client.db("Library");
     }
