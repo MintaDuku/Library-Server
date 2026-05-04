@@ -8,6 +8,98 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
+// Example: GET /stars?title= Sirius,Vega&minMagnitude=0.5
+app.get("/Library",async (req, res, next) => {
+
+    try{
+
+        console.log("URL completa:", req.url);
+        console.log("Query:", req.query);
+        console.log("Title:", req.query.title);
+
+        const libraryCollection = db.collection("books");
+        
+        const filter = {};
+
+        if (req.query.title){
+            const titles = req.query.title.split(","); 
+            console.log("Titles ricevuti:", titles);
+            filter.title = { $in : titles.map((title) => RegExp(`^${title.trim()}`,"i"))};
+        }
+
+        
+        if (req.query.author){     
+            const authors = req.query.author.split(","); 
+            filter.author = { $in : authors.map((authors) => RegExp(`^${authors.trim()}`,"i"))};
+        
+        }
+
+
+        if (req.query.year){
+            filter.year = Number(req.query.year);
+        }
+
+        
+        if (req.query.genre){
+            filter.genre = req.query.genre;
+        }
+
+        // if(Object.keys(filter).length == 0){
+        //     return res.status(400).json({error: "Almeno un filtro è richiesto"});
+        // }
+
+        const library = await libraryCollection.find(filter).toArray();
+
+        if (library.length === 0) {
+            return res.status(404).json({ error: "Nessun risultato trovato" });
+        }
+        console.log("Filter finale:", JSON.stringify(filter));
+
+
+        res.json(library);
+
+    } catch (err){
+        next(err)
+    }
+});
+
+app.get("/Library", async (req, res, next)=>{ 
+    try{
+        console.log("libri");
+       
+        const libraryCollection = db.collection("books");
+        const filter = {};
+
+        const library = await libraryCollection.find(filter).toArray();
+        
+
+        
+        res.json(library);
+    } catch (err) {
+        next(err);
+    }
+});
+
+
+
+app.get("/Library/:code",async (req, res, next)=>{
+    try{
+        console.log("libri");
+       
+        const libraryCollection = db.collection("books");
+        const filter = {
+            code: parseInt(req.params.code)
+        };
+
+        const library = await libraryCollection.findOne(filter);
+        res.json(library);
+
+    } catch(err){ 
+        next(err)
+    }
+});
+
 let db;
 
 async function startServer(){
@@ -15,7 +107,7 @@ async function startServer(){
         db = await connectDB();
 
         app.listen(PORT, () => {
-            console.log(`Serve running on http://localhost:${PORT}`);
+            console.log(`Server running on http://localhost:${PORT}`);
     
         });
     } catch (error) {
@@ -28,19 +120,3 @@ async function startServer(){
 startServer();
 
 
-// app.get("/stars", async (req, res, next)=>{ 
-//     try{
-//         console.log("stars!")
-//         // const stars = [{name:"Ciccio"}];
-//         const starsCollection = db.collection("stars");
-//         const filter = {};
-
-//         const stars = await starsCollection.find(filter).toArray();
-        
-
-//         //res.status(200).json(stars);
-//         res.json(stars);
-//     } catch (err) {
-//         next(err);
-//     }
-// });
