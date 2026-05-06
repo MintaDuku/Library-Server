@@ -119,6 +119,7 @@ app.get("/Library/:code",async (req, res, next)=>{
     }
 });
 
+// Users create
 app.post("/Users", async (req, res, next) => {
     try {
         const usersCollection = db.collection("books");
@@ -149,6 +150,7 @@ app.post("/Users", async (req, res, next) => {
     }
 });
 
+// Library delete
 app.post("/Library/:code",async (req, res, next)=>{
     try{
         console.log("libri");
