@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
+// OneUsers
 app.get("/Users/:id",async (req, res, next)=>{
     try{
         console.log("utenti");
@@ -26,6 +26,7 @@ app.get("/Users/:id",async (req, res, next)=>{
         next(err)
     }
 });
+
 // AllUsers
 app.get("/Users", async (req, res, next)=>{ 
     try{
@@ -152,9 +153,10 @@ app.post("/Users", async (req, res, next) => {
     try {
         console.log("Utenti crea")
 
-        const usersCollection = db.collection("books");
+        const usersCollection = db.collection("users");
       
         const hash = bcrypt.hash(req.body.passwd,12)
+
 
         const newUser= {
             name: req.body.name,
@@ -169,6 +171,44 @@ app.post("/Users", async (req, res, next) => {
         message: "User added",
         id: result.insertedId
         });
+
+    } catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "Code already exists"
+        });
+        }
+        next(err);
+    }
+});
+
+// Users create
+app.post("/Users", async (req, res, next) => {
+    try {
+        console.log("Utenti crea")
+
+        const usersCollection = db.collection("users");
+      
+        
+
+        const setValidation= {
+            email:req.body.email,
+            passwd:req.body.passwd
+        };
+
+        const filter ={
+            email: setValidation.email
+        }
+        
+        
+
+
+        const user = await usersCollection.findOne(filter);
+        const match = await bcrypt.compare(setValidation.passwd, user.passwd);
+
+       return res.status(match ? 201 : 401).json({
+            success: match
+       });
 
     } catch (err) {
         if (err.code === 11000) {
