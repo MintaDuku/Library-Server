@@ -55,14 +55,14 @@ app.get("/Library",async (req, res, next) => {
         }
 
 
-        if (req.query.year){
-            filter.year = Number(req.query.year);
-        }
+        // if (req.query.year){
+        //     filter.year = Number(req.query.year);
+        // }
 
         
-        if (req.query.genre){
-            filter.genre = req.query.genre;
-        }
+        // if (req.query.genre){
+        //     filter.genre = req.query.genre;
+        // }
 
         // if(Object.keys(filter).length == 0){
         //     return res.status(400).json({error: "Almeno un filtro è richiesto"});
@@ -129,7 +129,8 @@ app.post("/Library", async (req, res, next) => {
         availableCopies: Number(req.body.availableCopies),
         totalCopies: Number(req.body.totalCopies),
         code: Number(req.body.code),
-        isbn: Number(req.body.isbn)
+        isbn: Number(req.body.isbn),
+        description: req.body.description
         };
 
         const result = await booksCollection.insertOne(newBook);
