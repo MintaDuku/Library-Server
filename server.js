@@ -1,5 +1,6 @@
 import express, {json} from "express";
 import connectDB from "./db.js";
+import bcrypt from "bcrypt";
 import cors from "cors";
 
 const PORT = 3001;
@@ -115,6 +116,62 @@ app.get("/Library/:code",async (req, res, next)=>{
 
     } catch(err){ 
         next(err)
+    }
+});
+
+app.post("/Users", async (req, res, next) => {
+    try {
+        const usersCollection = db.collection("books");
+      
+        const hash = bcrypt.hash(req.body.passwd,12)
+
+        const newUser= {
+            name: req.body.name,
+            email:req.body.email,
+            passwd:hash
+        };
+        
+
+        const result = await usersCollection.insertOne(newUser);
+
+        res.status(201).json({
+        message: "User added",
+        id: result.insertedId
+        });
+
+    } catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "Code already exists"
+        });
+        }
+        next(err);
+    }
+});
+
+app.post("/Library/:code",async (req, res, next)=>{
+    try{
+        console.log("libri");
+       
+        const libraryCollection = db.collection("books");
+        const filter = {
+            code: parseInt(req.params.code)
+        };
+
+        const result = await libraryCollection.deleteOne(filter);
+        
+        res.status(201).json({
+        message: "Successfully deleted one document.",
+        id: result.insertedId
+        });
+
+    }catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "Code don't exists"
+        });
+        }
+        next(err);
     }
 });
 
