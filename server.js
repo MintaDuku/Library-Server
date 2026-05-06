@@ -119,9 +119,38 @@ app.get("/Library/:code",async (req, res, next)=>{
     }
 });
 
+// Library delete
+app.post("/Users/:id",async (req, res, next)=>{
+    try{
+        console.log("Utenti delete");
+       
+        const usersCollection = db.collection("users");
+        const filter = {
+            _id: parseInt(req.params.id)
+        };
+
+        const result = await usersCollection.deleteOne(filter);
+        
+        res.status(201).json({
+        message: "Successfully deleted one document.",
+        id: result.insertedId
+        });
+
+    }catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "id doesn't exists"
+        });
+        }
+        next(err);
+    }
+});
+
 // Users create
 app.post("/Users", async (req, res, next) => {
     try {
+        console.log("Utenti crea")
+
         const usersCollection = db.collection("books");
       
         const hash = bcrypt.hash(req.body.passwd,12)
@@ -170,7 +199,7 @@ app.post("/Library/:code",async (req, res, next)=>{
     }catch (err) {
         if (err.code === 11000) {
         return res.status(409).json({
-            error: "Code don't exists"
+            error: "Code doesn't exists"
         });
         }
         next(err);
