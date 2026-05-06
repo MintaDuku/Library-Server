@@ -189,7 +189,6 @@ app.post("/Users", async (req, res, next) => {
 
         const usersCollection = db.collection("users");
       
-        
 
         const setValidation= {
             email:req.body.email,
@@ -199,9 +198,6 @@ app.post("/Users", async (req, res, next) => {
         const filter ={
             email: setValidation.email
         }
-        
-        
-
 
         const user = await usersCollection.findOne(filter);
         const match = await bcrypt.compare(setValidation.passwd, user.passwd);
@@ -211,12 +207,14 @@ app.post("/Users", async (req, res, next) => {
        });
 
     } catch (err) {
+
         if (err.code === 11000) {
         return res.status(409).json({
             error: "Code already exists"
         });
         }
         next(err);
+        
     }
 });
 
