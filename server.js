@@ -10,6 +10,22 @@ app.use(express.json());
 app.use(cors());
 
 
+app.get("/Users/:id",async (req, res, next)=>{
+    try{
+        console.log("utenti");
+       
+        const usersCollection = db.collection("users");
+        const filter = {
+            _id: parseInt(req.params.id)
+        };
+
+        const users = await usersCollection.findOne(filter);
+        res.json(users);
+
+    } catch(err){ 
+        next(err)
+    }
+});
 // AllUsers
 app.get("/Users", async (req, res, next)=>{ 
     try{
@@ -102,24 +118,9 @@ app.get("/Library", async (req, res, next)=>{
 });
 
 
-app.get("/Library/:code",async (req, res, next)=>{
-    try{
-        console.log("libri");
-       
-        const libraryCollection = db.collection("books");
-        const filter = {
-            code: parseInt(req.params.code)
-        };
 
-        const library = await libraryCollection.findOne(filter);
-        res.json(library);
 
-    } catch(err){ 
-        next(err)
-    }
-});
-
-// Library delete
+// Users delete
 app.post("/Users/:id",async (req, res, next)=>{
     try{
         console.log("Utenti delete");
@@ -182,7 +183,7 @@ app.post("/Users", async (req, res, next) => {
 // Library delete
 app.post("/Library/:code",async (req, res, next)=>{
     try{
-        console.log("libri");
+        console.log("libri delete");
        
         const libraryCollection = db.collection("books");
         const filter = {
