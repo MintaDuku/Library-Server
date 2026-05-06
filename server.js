@@ -100,6 +100,37 @@ app.get("/Library/:code",async (req, res, next)=>{
     }
 });
 
+app.post("/Library", async (req, res, next) => {
+    try {
+        const booksCollection = db.collection("books");
+
+        const newBook = {
+        title: req.body.title,
+        author: req.body.author,
+        year: Number(req.body.year),
+        availableCopies: Number(req.body.availableCopies),
+        totalCopies: Number(req.body.totalCopies),
+        code: Number(req.body.code),
+        isbn: Number(req.body.isbn)
+        };
+
+        const result = await booksCollection.insertOne(newBook);
+
+        res.status(201).json({
+        message: "Book added",
+        id: result.insertedId
+        });
+
+    } catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "Code already exists"
+        });
+        }
+        next(err);
+    }
+});
+
 let db;
 
 async function startServer(){
