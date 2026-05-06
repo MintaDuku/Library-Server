@@ -9,6 +9,25 @@ app.use(express.json());
 app.use(cors());
 
 
+// AllUsers
+app.get("/Users", async (req, res, next)=>{ 
+    try{
+        console.log("Utenti");
+       
+        const usersCollection = db.collection("users");
+        const filter = {};
+        
+        const users = await usersCollection.find(filter).toArray();
+        
+        
+        res.json(users);
+    } catch (err) {
+        next(err);
+    }
+});
+
+
+
 // Example: GET /stars?title= Sirius,Vega&minMagnitude=0.5
 app.get("/Library",async (req, res, next) => {
 
@@ -80,7 +99,6 @@ app.get("/Library", async (req, res, next)=>{
         next(err);
     }
 });
-
 
 
 app.get("/Library/:code",async (req, res, next)=>{
