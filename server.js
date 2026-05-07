@@ -46,7 +46,7 @@ app.get("/Users", async (req, res, next)=>{
 
 
 
-// Example: GET /stars?title= Sirius,Vega&minMagnitude=0.5
+// Example: GET /Library?title= Sirius...
 app.get("/Library",async (req, res, next) => {
 
     try{
