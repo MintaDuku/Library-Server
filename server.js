@@ -2,6 +2,8 @@ import express, {json} from "express";
 import connectDB from "./db.js";
 import bcrypt from "bcrypt";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv"; 
 
 const PORT = 3001;
 const app = express();
@@ -9,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// OneUsers
+// Get One-User by id
 app.get("/Users/:id",async (req, res, next)=>{
     try{
         console.log("utenti");
@@ -27,7 +29,7 @@ app.get("/Users/:id",async (req, res, next)=>{
     }
 });
 
-// AllUsers
+// Get All Users
 app.get("/Users", async (req, res, next)=>{ 
     try{
         console.log("Utenti");
@@ -117,7 +119,7 @@ app.get("/Library", async (req, res, next)=>{
     }
 });
 
-// Users delete
+// Delete User
 app.delete("/Users/:id",async (req, res, next)=>{
     try{
         console.log("Utenti delete");
@@ -144,8 +146,8 @@ app.delete("/Users/:id",async (req, res, next)=>{
     }
 });
 
-// Users create
-app.post("/Users", async (req, res, next) => {
+// Create User
+app.post("/Users/register", async (req, res, next) => {
     try {
         console.log("Utenti crea")
 
@@ -179,8 +181,8 @@ app.post("/Users", async (req, res, next) => {
     }
 });
 
-// Users create
-app.post("/Users", async (req, res, next) => {
+// Users login
+app.post("/Users/login", async (req, res, next) => {
     try {
         console.log("Utenti crea")
 
@@ -202,7 +204,17 @@ app.post("/Users", async (req, res, next) => {
 
         const match = await bcrypt.compare(setValidation.passwd, user.passwd);
 
-        return res.status(match ? 201 : 401).json({success: match});
+        if (!match) return res.status(401).json({success: match});
+
+        // Genera token con dati non sensibili
+        const token =  jwt.sign(
+            {userId: user._id, email: user.email},
+            SECRET,
+            {expiresIn: '24h'} // scade dopo 24 ore
+            
+        )
+
+        return res.status(201).json({success: match, token}); // token = token: token
 
     } catch (err) {
 
@@ -216,7 +228,7 @@ app.post("/Users", async (req, res, next) => {
     }
 });
 
-// Library delete
+// Delete Book
 app.delete("/Library/:code",async (req, res, next)=>{
     try{
         console.log("libri delete");
@@ -228,21 +240,19 @@ app.delete("/Library/:code",async (req, res, next)=>{
 
         const result = await libraryCollection.deleteOne(filter);
         
-        res.status(201).json({
-        message: "Successfully deleted one document.",
-        id: result.insertedId
-        });
+        res.status(201).json({message: "Successfully deleted.",id: result.insertedId});
 
     }catch (err) {
         if (err.code === 11000) {
         return res.status(409).json({
-            error: "Code doesn't exists"
+            error: "Book doesn't exists"
         });
         }
         next(err);
     }
 });
 
+// Add Book
 app.post("/Library", async (req, res, next) => {
     try {
         const booksCollection = db.collection("books");
@@ -273,7 +283,7 @@ app.post("/Library", async (req, res, next) => {
 });
 
 let db;
-
+// Server start
 async function startServer(){
     try{
         db = await connectDB();
