@@ -1,6 +1,8 @@
 import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
 
-const uri = "mongodb://127.0.0.1:27017";
+dotenv.config();
+const uri = process.env.DB_URL;
 const client = new MongoClient(uri);
 
 let db;
@@ -11,7 +13,7 @@ export default async function connectDB(){
 
         console.log("Connected to MongoDB");
 
-        db = client.db("Library");
+        db = client.db(process.env.DB_NAME);
     }
 
     return db;
