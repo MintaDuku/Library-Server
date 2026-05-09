@@ -5,7 +5,7 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv"; 
 
-const PORT = 3001;
+const PORT = process.env.PORT;
 const app = express();
 
 app.use(express.json());
@@ -205,6 +205,9 @@ app.post("/Users/login", async (req, res, next) => {
         const match = await bcrypt.compare(setValidation.passwd, user.passwd);
 
         if (!match) return res.status(401).json({success: match});
+
+        dotenv.config();
+        const SECRET = process.env.JWT_SECRET;
 
         // Genera token con dati non sensibili
         const token =  jwt.sign(
