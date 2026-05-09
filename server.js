@@ -45,7 +45,6 @@ app.get("/Users", async (req, res, next)=>{
 });
 
 
-
 // Example: GET /Library?title= Sirius...
 app.get("/Library",async (req, res, next) => {
 
@@ -118,11 +117,8 @@ app.get("/Library", async (req, res, next)=>{
     }
 });
 
-
-
-
 // Users delete
-app.post("/Users/:id",async (req, res, next)=>{
+app.delete("/Users/:id",async (req, res, next)=>{
     try{
         console.log("Utenti delete");
        
@@ -155,8 +151,10 @@ app.post("/Users", async (req, res, next) => {
 
         const usersCollection = db.collection("users");
       
-        const hash = bcrypt.hash(req.body.passwd,12)
-
+        const hash =  await bcrypt.hash(req.body.passwd,12)
+        //                                             ↑
+        //                                         "salt rounds" → quanto è lento
+        //                                         l'algoritmo (più alto = più sicuro)
 
         const newUser= {
             name: req.body.name,
@@ -164,7 +162,6 @@ app.post("/Users", async (req, res, next) => {
             passwd:hash
         };
         
-
         const result = await usersCollection.insertOne(newUser);
 
         res.status(201).json({
@@ -194,17 +191,18 @@ app.post("/Users", async (req, res, next) => {
             email:req.body.email,
             passwd:req.body.passwd
         };
-
+ 
         const filter ={
             email: setValidation.email
         }
 
         const user = await usersCollection.findOne(filter);
+        
+        if(!user) return res.status(404).json({error: 'Users not found'});
+
         const match = await bcrypt.compare(setValidation.passwd, user.passwd);
 
-       return res.status(match ? 201 : 401).json({
-            success: match
-       });
+        return res.status(match ? 201 : 401).json({success: match});
 
     } catch (err) {
 
@@ -219,7 +217,7 @@ app.post("/Users", async (req, res, next) => {
 });
 
 // Library delete
-app.post("/Library/:code",async (req, res, next)=>{
+app.delete("/Library/:code",async (req, res, next)=>{
     try{
         console.log("libri delete");
        
@@ -250,27 +248,24 @@ app.post("/Library", async (req, res, next) => {
         const booksCollection = db.collection("books");
 
         const newBook = {
-        title: req.body.title,
-        author: req.body.author,
-        year: Number(req.body.year),
-        availableCopies: Number(req.body.availableCopies),
-        totalCopies: Number(req.body.totalCopies),
-        code: Number(req.body.code),
-        isbn: Number(req.body.isbn),
-        description: req.body.description
+            title: req.body.title,
+            author: req.body.author,
+            year: Number(req.body.year),
+            availableCopies: Number(req.body.availableCopies),
+            totalCopies: Number(req.body.totalCopies),
+            code: Number(req.body.code),
+            isbn: Number(req.body.isbn),
+            description: req.body.description
         };
 
         const result = await booksCollection.insertOne(newBook);
 
-        res.status(201).json({
-        message: "Book added",
-        id: result.insertedId
-        });
+        res.status(201).json({message: "Book added", id: result.insertedId });
 
     } catch (err) {
         if (err.code === 11000) {
         return res.status(409).json({
-            error: "Code already exists"
+            error: "Book already exists"
         });
         }
         next(err);
