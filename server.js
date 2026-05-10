@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv"; 
 import 'dotenv/config';
 
+const SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT;
 const app = express();
 
@@ -208,7 +209,6 @@ app.post("/Users/login", async (req, res, next) => {
         if (!match) return res.status(401).json({success: match});
 
         dotenv.config();
-        const SECRET = process.env.JWT_SECRET;
 
         // Genera token con dati non sensibili
         const token =  jwt.sign(
@@ -285,6 +285,26 @@ app.post("/Library", async (req, res, next) => {
         next(err);
     }
 });
+
+async function authServer(re,res,next){
+    console.log(req.headers);
+
+    const authHeader = req.headers.authorization;
+    
+    const token = req.headers.authorization?.split(" ")[1];
+    // Se authorization non esiste → restituisce undefined, nessun crash
+
+    if(!token) return res.status(401).json({error: "Token missed"});
+
+    try{
+        const decoded = jwt.verify(token, SECRET); // token validator
+        req.user = decoded;  // ex: { userId: 123, email: ...}
+        next();
+    }catch{
+        return res.status(401).json({error: "Token doesnt valid"});
+    }
+
+}
 
 let db;
 // Server start
