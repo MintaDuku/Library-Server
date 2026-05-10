@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv"; 
+import 'dotenv/config';
 
 const PORT = process.env.PORT;
 const app = express();
