@@ -104,23 +104,6 @@ app.get("/Library",async (req, res, next) => {
     }
 });
 
-app.get("/Library", async (req, res, next)=>{ 
-    try{
-        console.log("libri");
-       
-        const libraryCollection = db.collection("books");
-        const filter = {};
-
-        const library = await libraryCollection.find(filter).toArray();
-        
-
-        
-        res.json(library);
-    } catch (err) {
-        next(err);
-    }
-});
-
 // Delete User
 app.delete("/Users/:id",async (req, res, next)=>{
     try{
@@ -142,6 +125,30 @@ app.delete("/Users/:id",async (req, res, next)=>{
         if (err.code === 11000) {
         return res.status(409).json({
             error: "id doesn't exists"
+        });
+        }
+        next(err);
+    }
+});
+
+// Delete Book
+app.delete("/Library/:code",async (req, res, next)=>{
+    try{
+        console.log("libri delete");
+       
+        const libraryCollection = db.collection("books");
+        const filter = {
+            code: parseInt(req.params.code)
+        };
+
+        const result = await libraryCollection.deleteOne(filter);
+        
+        res.status(200).json({message: "Successfully deleted."});
+
+    }catch (err) {
+        if (err.code === 11000) {
+        return res.status(409).json({
+            error: "Book doesn't exists"
         });
         }
         next(err);
@@ -209,7 +216,7 @@ app.post("/Users/login", async (req, res, next) => {
 
         if (!match) return res.status(401).json({success: match});
 
-        dotenv.config();
+        // dotenv.config();
 
         // Genera token con dati non sensibili
         const token =  jwt.sign(
@@ -219,7 +226,7 @@ app.post("/Users/login", async (req, res, next) => {
             
         )
 
-        return res.status(201).json({success: match, token}); // token = token: token
+        return res.status(200).json({success: match, token}); // token = token: token
 
     } catch (err) {
 
@@ -230,30 +237,6 @@ app.post("/Users/login", async (req, res, next) => {
         }
         next(err);
         
-    }
-});
-
-// Delete Book
-app.delete("/Library/:code",async (req, res, next)=>{
-    try{
-        console.log("libri delete");
-       
-        const libraryCollection = db.collection("books");
-        const filter = {
-            code: parseInt(req.params.code)
-        };
-
-        const result = await libraryCollection.deleteOne(filter);
-        
-        res.status(201).json({message: "Successfully deleted.",id: result.insertedId});
-
-    }catch (err) {
-        if (err.code === 11000) {
-        return res.status(409).json({
-            error: "Book doesn't exists"
-        });
-        }
-        next(err);
     }
 });
 
@@ -287,7 +270,82 @@ app.post("/Library", async (req, res, next) => {
     }
 });
 
-async function authServer(re,res,next){
+
+// Change User
+app.put("/Users/:id", /*authServer, requireAdmin,*/ async (req, res, next) => {
+    try {
+        const usersCollection = db.collection("users");
+
+        const filter = { _id: parseInt(req.params.id) };
+
+        const update = {
+            $set: {
+                name: req.body.name,
+                email: req.body.email,
+                admin: req.body.admin
+            }
+        };
+
+        // Se manda anche la password, la ri-hashiamo
+        if (req.body.passwd) {
+            update.$set.passwd = await bcrypt.hash(req.body.passwd, 12);
+        }
+
+        const result = await usersCollection.updateOne(filter, update);
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ message: "User update" });
+
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Change Book
+app.put("/Library/:code"/*, authServer, requireAdmin*/, async (req, res, next) => {
+    try {
+        const libraryCollection = db.collection("books");
+
+        const filter = { code: parseInt(req.params.code) };
+
+        const update = {
+            $set: {
+                title: req.body.title,
+                author: req.body.author,
+                year: Number(req.body.year),
+                availableCopies: Number(req.body.availableCopies),
+                totalCopies: Number(req.body.totalCopies),
+                isbn: Number(req.body.isbn),
+                description: req.body.description
+            }
+        };
+
+        const result = await libraryCollection.updateOne(filter, update);// {},{}
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: "Book not found" });
+        }
+
+        res.status(200).json({ message: "Book update" });
+
+    } catch (err) {
+        next(err);
+    }
+});
+
+
+function requireAdmin(req, res, next) {
+    if (!req.user.admin) {
+        return res.status(403).json({ error: "Deny Access: require admin" });
+    }
+    next();
+}
+
+
+async function authServer(req,res,next){
     console.log(req.headers);
 
     const authHeader = req.headers.authorization;
