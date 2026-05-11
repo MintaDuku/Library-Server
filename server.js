@@ -162,7 +162,8 @@ app.post("/Users/register", async (req, res, next) => {
         const newUser= {
             name: req.body.name,
             email:req.body.email,
-            passwd:hash
+            passwd:hash,
+            admin: req.body.admin
         };
         
         const result = await usersCollection.insertOne(newUser);
@@ -212,7 +213,7 @@ app.post("/Users/login", async (req, res, next) => {
 
         // Genera token con dati non sensibili
         const token =  jwt.sign(
-            {userId: user._id, email: user.email},
+            {userId: user._id, name: user.name, email: user.email, admin: user.admin},
             SECRET,
             {expiresIn: '24h'} // scade dopo 24 ore
             
