@@ -1,2 +1,7 @@
-{"_id":1,"name":"Mario Rossi","email":"mario.rossi@email.it","passwd":"pippo"}
-{"_id":2,"name":"Giulia Bianchi","email":"giulia.bianchi@email.it","passwd":"pippo"}
+{"_id":{"$oid":"6a023a3300504ce736ccd0e2"},"name":"Peter Capaldi","email":"peter.capaldi@email.com","passwd":"$2b$12$lq8Zyc2mSy9LFMlljr8GlOD00Ekf1WnnpnLIB.hdRl028i32MLnVq","admin":0,"code":1}
+{"_id":{"$oid":"6a023b149ee067d5c1f53217"},"name":"Bill Watterson","email":"bill.watterson@email.com","passwd":"$2b$12$hMx./lVj0i7fAEsJ.Y4L9.VTmAx8y4uZbvbkd9zd4RQT5iPhAveze","admin":0,"code":2}
+{"_id":{"$oid":"6a023b1b9ee067d5c1f53218"},"name":"Giacomo","email":"giacomo.serafini@email.com","passwd":"$2b$12$nlHcmtpt3kFpZHWfgORkBOc/O/mKCTgrqHR.sNi0DSbjpe6CHdWQW","admin":1,"code":3}
+{"_id":{"$oid":"6a023b1f9ee067d5c1f53219"},"name":"Reuben","email":"reuben.minta@email.com","passwd":"$2b$12$N1g/Ajw/F1EtUFofKvYF0ePowc3sdfHgYZkuEgKYHV0uQ9ka3pMiS","admin":1,"code":4}
+{"_id":{"$oid":"6a0245759ee067d5c1f5321a"},"name":"Matt Smith","email":"matt.smith@gmail.com","passwd":"$2b$12$LYuznTMSILQTtx6AZsWu1.N/WMCas.8oYpNt.K//SGSqhE64EN80K","admin":0,"code":5}
+{"_id":{"$oid":"6a0245ea9ee067d5c1f5321b"},"name":"David Tennant","email":"david.tennant@email.com","passwd":"$2b$12$qxqnDdWvKKQabrK6eF2HXuYnI.yJ9IWswzwASRteFwOvGS2Gs0mvq","admin":0,"code":6}
+{"_id":{"$oid":"6a0247469ee067d5c1f5321c"},"name":"Christopher Eccleston","email":"christopher.eccleston@email.it","passwd":"$2b$12$w3qoEsCDd8.5HLzqBDuLsu57/Wtau7EGgrReLUbECWi4uFQTK0zgq","admin":0,"code":7}
