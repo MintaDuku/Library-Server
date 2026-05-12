@@ -133,15 +133,18 @@ app.delete("/Users/:id",async (req, res, next)=>{
 
 // Delete Book
 app.delete("/Library/:code",async (req, res, next)=>{
-    try{
-        console.log("libri delete");
-       
-        const libraryCollection = db.collection("books");
-        const filter = {
-            code: parseInt(req.params.code)
-        };
 
-        const result = await libraryCollection.deleteOne(filter);
+    console.log("delete book");
+
+    try{
+        const codeToDelete = parseInt(req.params.code);
+        
+        if (isNaN(codeToDelete)) {
+            return res.status(400).json({ error: "Invalid code format" });
+        }
+
+        const libraryCollection = db.collection("books");
+        const result = await libraryCollection.deleteOne({ code: codeToDelete });
         
         res.status(200).json({message: "Successfully deleted."});
 
