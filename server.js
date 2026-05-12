@@ -81,9 +81,9 @@ app.get("/Library",async (req, res, next) => {
         // }
 
         
-        // if (req.query.genre){
-        //     filter.genre = req.query.genre;
-        // }
+        if (req.query.genre){
+            filter.genre = RegExp(`^${req.query.genre.trim()}`, "i");
+        }
 
         // if(Object.keys(filter).length == 0){
         //     return res.status(400).json({error: "Almeno un filtro è richiesto"});
