@@ -3,7 +3,7 @@ import connectDB from "./db.js";
 import bcrypt from "bcrypt";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv"; 
+// import dotenv from "dotenv"; 
 import 'dotenv/config';
 
 const SECRET = process.env.JWT_SECRET;
