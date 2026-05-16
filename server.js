@@ -201,7 +201,6 @@ app.post("/Users/login", async (req, res, next) => {
 
         const usersCollection = db.collection("users");
       
-
         const setValidation= {
             email:req.body.email,
             passwd:req.body.passwd
@@ -225,7 +224,7 @@ app.post("/Users/login", async (req, res, next) => {
         const token =  jwt.sign(
             {userId: user._id, name: user.name, email: user.email, admin: user.admin},
             SECRET,
-            {expiresIn: '24h'} // scade dopo 24 ore
+            {expiresIn: '1h'} // scade dopo 1 ora
             
         )
 
