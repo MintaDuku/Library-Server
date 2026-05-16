@@ -314,17 +314,14 @@ app.put("/Library/:code"/*, authServer, requireAdmin*/, async (req, res, next) =
 
         const filter = { code: parseInt(req.params.code) };
 
-        const update = {
-            $set: {
-                title: req.body.title,
-                author: req.body.author,
-                year: Number(req.body.year),
-                availableCopies: Number(req.body.availableCopies),
-                totalCopies: Number(req.body.totalCopies),
-                isbn: Number(req.body.isbn),
-                description: req.body.description
-            }
-        };
+        const setFields = {};
+        if (req.body.title !== undefined) {setFields.title = req.body.title}
+        if (req.body.author !== undefined) {setFields.author = req.body.author}
+        if (req.body.year !== undefined) {setFields.year = Number(req.body.year)}
+        if (req.body.isbn !== undefined) {setFields.isbn = Number(req.body.isbn)}
+        if (req.body.description !== undefined) {setFields.description = req.body.description}
+
+        const update = { $set: setFields };
 
         const result = await libraryCollection.updateOne(filter, update);// {},{}
 
