@@ -8,8 +8,9 @@ import 'dotenv/config';
 
 const SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT;
-const app = express();
+const REFRESH =process.env.REFRESH_TOKEN;
 
+const app = express();
 app.use(express.json());
 app.use(cors());
 
