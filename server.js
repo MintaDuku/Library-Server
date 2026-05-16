@@ -353,7 +353,7 @@ async function authServer(req,res,next){
 
     const authHeader = req.headers.authorization;
     
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = authHeader.startsWith("Bearer") ? req.headers.authorization?.split(" ")[1] : null;
     // Se authorization non esiste → restituisce undefined, nessun crash
 
     if(!token) return res.status(401).json({error: "Token missed"});
