@@ -2,14 +2,24 @@ import express, {json} from "express";
 import connectDB from "./db.js";
 import bcrypt from "bcrypt";
 import cors from "cors";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
+import mongoose from "mongoose";
 // import dotenv from "dotenv"; 
 import 'dotenv/config';
 
 const SECRET = process.env.JWT_SECRET ?? 3000;
 const PORT = process.env.PORT ?? 3000;
 const REFRESH =process.env.REFRESH_TOKEN;
+const EXP_ACCESS_TTL=process.env.EXP_ACCESS_TTL;
+const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL;
 
+const refreshTokenSchema = new mongoose.Schema({
+    token: { type: String, required:true, unique: true},
+    userId: {type: String, required: true },
+    createdAT: {type: Date, default: Date.now, expires: EXP_REFRESH_TTL} // TTL automatico
+})
+
+const RefreshToken = mongoose.model("refreshTokens",refreshTokenSchema);
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -356,9 +366,9 @@ function requireAdmin(req, res, next) {
 async function authServer(req,res,next){
     console.log(req.headers);
 
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers?.authorization;
     
-    const token = authHeader.startsWith("Bearer") ? req.headers.authorization?.split(" ")[1] : null;
+    const token = authHeader?.startsWith("Bearer") ? req.headers.authorization?.split(" ")[1] : null;
     // Se authorization non esiste → restituisce undefined, nessun crash
 
     if(!token) return res.status(401).json({error: "Token missed"});
@@ -370,16 +380,44 @@ async function authServer(req,res,next){
     }catch{
         return res.status(401).json({error: "Token doesnt valid"});
     }
-
 }
 
+// generate refresh token
+async function genRefreshToken(userId){
+    return jwt.sign(
+        { userId: user._id },
+         REFRESH_SECRET,
+        { expiresIn: EXP_REFRESH_TTL}
+    );
+}
+
+// saved refresh token
 async function issueRefreshToken(db,userId,refreshToken){
-    const  refreshCollection =  db.collection("refreshToken");
-    await refreshCollection.insertOne({
-        token: refreshToken,
-        userId: userId,
-        createdAt: new Date()
-    });
+   await RefreshToken.create({token: refreshToken,userId: userId});
+}
+
+async function refreshAccesToken(db,req,res){
+    const {refreshToken} = req.body;
+    
+    if(!refreshToken) 
+        return res.status(401).json({error:"Missing token refresh"});
+
+    const refreshCollection = db.collection("refreshTokens");
+    const saved = await refreshCollection.findOne({token: refreshToken}); 
+
+    if(!saved)
+        return res.status(403).json({ error: "Invalid token refresh"})
+
+    try{
+        const decoded = jwt.verify(refreshToken, REFRESH);
+
+        const newAccesToken = genRefreshToken(decoded.userId);
+
+        res.json({token: newAccesToken});
+    }catch{
+        await  RefreshToken.deleteOne({ token: refreshToken});
+        return res.status(403).json({ erro: "expired refesh token"});
+    }
 }
 
 let db;
