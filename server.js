@@ -407,8 +407,7 @@ async function refreshAccesToken(db,req,res){
     if(!refreshToken) 
         return res.status(401).json({error:"Missing token refresh"});
 
-    const refreshCollection = db.collection("refreshTokens");
-    const saved = await refreshCollection.findOne({token: refreshToken}); 
+    const saved = await RefreshToken.findOne({token: refreshToken}); 
 
     if(!saved)
         return res.status(403).json({ error: "Invalid token refresh"})
