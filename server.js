@@ -245,6 +245,14 @@ app.post("/Users/login", async (req, res, next) => {
 
 // Add Book
 app.post("/Library", async (req, res, next) => {
+    //Controllo campi obbligatori
+    if (!req.body.title || !req.body.author || !req.body.code || !req.body.isbn) {
+        return res.status(400).json({ error: "Titolo, autore, codice e isbn sono obbligatori" });
+    }
+    //Controllo code
+    if (isNaN(Number(req.body.code))) {
+        return res.status(400).json({ error: "Codice invalido" });
+    }
     try {
         const booksCollection = db.collection("books");
 
@@ -252,8 +260,6 @@ app.post("/Library", async (req, res, next) => {
             title: req.body.title,
             author: req.body.author,
             year: Number(req.body.year),
-            availableCopies: Number(req.body.availableCopies),
-            totalCopies: Number(req.body.totalCopies),
             code: Number(req.body.code),
             isbn: Number(req.body.isbn),
             description: req.body.description
@@ -266,7 +272,7 @@ app.post("/Library", async (req, res, next) => {
     } catch (err) {
         if (err.code === 11000) {
         return res.status(409).json({
-            error: "Book already exists"
+            error: "A book with this code already exists"
         });
         }
         next(err);
