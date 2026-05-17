@@ -6,8 +6,8 @@ import jwt from "jsonwebtoken";
 // import dotenv from "dotenv"; 
 import 'dotenv/config';
 
-const SECRET = process.env.JWT_SECRET;
-const PORT = process.env.PORT;
+const SECRET = process.env.JWT_SECRET ?? 3000;
+const PORT = process.env.PORT ?? 3000;
 const REFRESH =process.env.REFRESH_TOKEN;
 
 const app = express();
@@ -371,6 +371,15 @@ async function authServer(req,res,next){
         return res.status(401).json({error: "Token doesnt valid"});
     }
 
+}
+
+async function issueRefreshToken(db,userId,refreshToken){
+    const  refreshCollection =  db.collection("refreshToken");
+    await refreshCollection.insertOne({
+        token: refreshToken,
+        userId: userId,
+        createdAt: new Date()
+    });
 }
 
 let db;
