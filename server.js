@@ -257,6 +257,14 @@ app.post("/Users/refresh", async (req,res)=>{
 
 // Add Book
 app.post("/Library", async (req, res, next) => {
+    //Controllo campi obbligatori
+    if (!req.body.title || !req.body.author || !req.body.code || !req.body.isbn) {
+        return res.status(400).json({ error: "Titolo, autore, codice e isbn sono obbligatori" });
+    }
+    //Controllo code
+    if (isNaN(Number(req.body.code))) {
+        return res.status(400).json({ error: "Codice invalido" });
+    }
     try {
         const booksCollection = db.collection("books");
 
@@ -264,8 +272,6 @@ app.post("/Library", async (req, res, next) => {
             title: req.body.title,
             author: req.body.author,
             year: Number(req.body.year),
-            availableCopies: Number(req.body.availableCopies),
-            totalCopies: Number(req.body.totalCopies),
             code: Number(req.body.code),
             isbn: Number(req.body.isbn),
             description: req.body.description
@@ -278,7 +284,7 @@ app.post("/Library", async (req, res, next) => {
     } catch (err) {
         if (err.code === 11000) {
         return res.status(409).json({
-            error: "Book already exists"
+            error: "A book with this code already exists"
         });
         }
         next(err);
@@ -326,17 +332,14 @@ app.put("/Library/:code"/*, authServer, requireAdmin*/, async (req, res, next) =
 
         const filter = { code: parseInt(req.params.code) };
 
-        const update = {
-            $set: {
-                title: req.body.title,
-                author: req.body.author,
-                year: Number(req.body.year),
-                availableCopies: Number(req.body.availableCopies),
-                totalCopies: Number(req.body.totalCopies),
-                isbn: Number(req.body.isbn),
-                description: req.body.description
-            }
-        };
+        const setFields = {};
+        if (req.body.title !== undefined) {setFields.title = req.body.title}
+        if (req.body.author !== undefined) {setFields.author = req.body.author}
+        if (req.body.year !== undefined) {setFields.year = Number(req.body.year)}
+        if (req.body.isbn !== undefined) {setFields.isbn = Number(req.body.isbn)}
+        if (req.body.description !== undefined) {setFields.description = req.body.description}
+
+        const update = { $set: setFields };
 
         const result = await libraryCollection.updateOne(filter, update);// {},{}
 
