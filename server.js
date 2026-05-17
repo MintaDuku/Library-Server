@@ -7,11 +7,11 @@ import mongoose from "mongoose";
 // import dotenv from "dotenv"; 
 import 'dotenv/config';
 
-const SECRET = process.env.JWT_SECRET ?? 3000;
+const SECRET = process.env.JWT_SECRET ?? "SECRET";
 const PORT = process.env.PORT ?? 3000;
-const REFRESH =process.env.REFRESH_TOKEN;
-const EXP_ACCESS_TTL=process.env.EXP_ACCESS_TTL;
-const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL;
+const REFRESH =process.env.REFRESH_TOKEN ?? "REFRESH";
+const EXP_ACCESS_TTL=process.env.EXP_ACCESS_TTL ?? "30m";
+const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL ?? "30d";
 
 const refreshTokenSchema = new mongoose.Schema({
     token: { type: String, required:true, unique: true},
@@ -211,21 +211,18 @@ app.post("/Users/login", async (req, res, next) => {
         console.log("Utenti crea")
 
         const usersCollection = db.collection("users");
-      
-        const setValidation= {
-            email:req.body.email,
-            passwd:req.body.passwd
-        };
- 
+        
+        const {email,passwd} = req.body;
+       
         const filter ={
-            email: setValidation.email
+            email: email
         }
 
         const user = await usersCollection.findOne(filter);
         
         if(!user) return res.status(404).json({error: 'Users not found'});
 
-        const match = await bcrypt.compare(setValidation.passwd, user.passwd);
+        const match = await bcrypt.compare(passwd, user.passwd);
 
         if (!match) return res.status(401).json({success: match});
 
@@ -382,8 +379,16 @@ async function authServer(req,res,next){
     }
 }
 
+async function genAccessToken(user){
+    return jwt.sign(
+            {userId: user._id, name: user.name, email: user.email, admin: user.admin},
+            SECRET,
+            {expiresIn: EXP_ACCESS_TTL}
+        );
+}
+
 // generate refresh token
-async function genRefreshToken(userId){
+async function genRefreshToken(user){
     return jwt.sign(
         { userId: user._id },
          REFRESH_SECRET,
