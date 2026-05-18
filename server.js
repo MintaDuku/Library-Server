@@ -427,6 +427,17 @@ async function refreshAccesToken(db,req,res){
     }
 }
 
+async function revokeRefreshtoken(req,res){
+    const {refreshToken} = req.body;
+
+     if(!refreshToken) 
+        return res.status(401).json({error:"Missing token refresh"});
+
+     await RefreshToken.deleteOne({token: refreshToken });
+
+     return res.json({message: "logout"})
+}
+
 let db;
 // Server start
 async function startServer(){
