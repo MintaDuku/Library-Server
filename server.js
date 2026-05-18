@@ -48,7 +48,6 @@ app.get("/Users", async (req, res, next)=>{
     }
 });
 
-
 // Example: GET /Library?title= Sirius...
 app.get("/Library",async (req, res, next) => {
 
@@ -186,11 +185,13 @@ app.post("/Users/register", async (req, res, next) => {
 
     } catch (err) {
         if (err.code === 11000) {
-        return res.status(409).json({
-            error: "Code already exists"
-        });
+            if (err.keyPattern.email) {
+                return res.status(409).json({ error: "Mail already in use" });
+            }
+            if (err.keyPattern.code) {
+                return res.status(409).json({ error: "Code already in use" });
+            }
         }
-        next(err);
     }
 });
 
@@ -278,7 +279,6 @@ app.post("/Library", async (req, res, next) => {
         next(err);
     }
 });
-
 
 // Change User
 app.put("/Users/:id", /*authServer, requireAdmin,*/ async (req, res, next) => {
