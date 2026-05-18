@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(cors());
 
 // Get One-User by id
-app.get("/Users/:id", async (req, res, next) => {
+app.get("/Users/:id",authServer, requireAdmin,async (req, res, next) => {
     try {
         console.log("utenti");
         const usersCollection = db.collection("users");
@@ -37,7 +37,7 @@ app.get("/Users/:id", async (req, res, next) => {
 });
 
 // Get All Users
-app.get("/Users", async (req, res, next) => {
+app.get("/Users",authServer, requireAdmin, async (req, res, next) => {
     try {
         console.log("Utenti");
         const usersCollection = db.collection("users");
@@ -87,7 +87,7 @@ app.get("/Library", async (req, res, next) => {
 });
 
 // Delete User
-app.delete("/Users/:id", async (req, res, next) => {
+app.delete("/Users/:id",authServer, requireAdmin, async (req, res, next) => {
     try {
         console.log("Utenti delete");
         const usersCollection = db.collection("users");
@@ -103,7 +103,7 @@ app.delete("/Users/:id", async (req, res, next) => {
 });
 
 // Delete Book
-app.delete("/Library/:code", async (req, res, next) => {
+app.delete("/Library/:code",authServer, requireAdmin, async (req, res, next) => {
     console.log("delete book");
     try {
         const codeToDelete = parseInt(req.params.code);
@@ -183,12 +183,12 @@ app.post("/Users/refresh", async (req, res) => {
 });
 
 // Logout / revoke refresh token
-app.post("/Users/logout", async (req, res) => {
+app.post("/Users/logout", authServer,async (req, res) => {
     await revokeRefreshToken(req, res);
 });
 
 // Add Book
-app.post("/Library", async (req, res, next) => {
+app.post("/Library", authServer, requireAdmin, async (req, res, next) => {
     if (!req.body.title || !req.body.author || !req.body.code || !req.body.isbn) {
         return res.status(400).json({ error: "Titolo, autore, codice e isbn sono obbligatori" });
     }
@@ -216,7 +216,7 @@ app.post("/Library", async (req, res, next) => {
 });
 
 // Change User
-app.put("/Users/:id", /*authServer, requireAdmin,*/ async (req, res, next) => {
+app.put("/Users/:id", authServer, requireAdmin,async (req, res, next) => {
     try {
         const usersCollection = db.collection("users");
         const filter = { _id: parseInt(req.params.id) };
@@ -241,7 +241,7 @@ app.put("/Users/:id", /*authServer, requireAdmin,*/ async (req, res, next) => {
 });
 
 // Change Book
-app.put("/Library/:code", /*authServer, requireAdmin,*/ async (req, res, next) => {
+app.put("/Library/:code",authServer, requireAdmin, async (req, res, next) => {
     try {
         const libraryCollection = db.collection("books");
         const filter = { code: parseInt(req.params.code) };
@@ -341,7 +341,7 @@ async function revokeRefreshToken(req, res) {
 }
 
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+//Start 
 
 let db;
 async function startServer() {
