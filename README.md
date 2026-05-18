@@ -221,6 +221,13 @@ Content-Type: application/json
 
 ---
 
+## Related
+
+- [library-client](https://github.com/Serafin-sudo/Project-Work) — Frontend interface
+
+---
+
 ## License
 
 MIT
+
