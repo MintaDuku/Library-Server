@@ -66,51 +66,59 @@ app.get("/Library",async (req, res, next) => {
 
         console.log("URL completa:", req.url);
         console.log("Query:", req.query);
-        console.log("Title:", req.query.title);
 
         const libraryCollection = db.collection("books");
         
+        // Condizioni che stiamo chiedendo
+        const conditions = [];
+
+        // Condizioni ricerca S.M.A.R.T.
+        // (cerca qualunque corrispondenza in vari campi)
+        if (req.query.search) {
+            const regex = new RegExp(req.query.search, 'i');
+            conditions.push({ $or: [
+                { title: regex },
+                { author: regex },
+                { genre: regex },
+                { description: regex },
+            ]});
+        }
+
+        // Condizioni titolo
+        if (req.query.title) {
+            const titles = req.query.title.split(",");
+            conditions.push({ title: { $in: titles.map(t => RegExp(`${t.trim()}`, "i")) } });
+        }
+        // Condizioni autore
+        if (req.query.author) {
+            const authors = req.query.author.split(",");
+            conditions.push({ author: { $in: authors.map(a => RegExp(`${a.trim()}`, "i")) } });
+        }
+        // Condizioni genere
+        if (req.query.genre) {
+            const genres = req.query.genre.split(",");
+            conditions.push({ genre: { $in: genres.map(a => RegExp(`${a.trim()}`, "i")) } });
+        }
+
+        // Filtro finale, a cui vengono applicate le conditions
         const filter = {};
-
-        if (req.query.title){
-            const titles = req.query.title.split(","); 
-            console.log("Titles ricevuti:", titles);
-            filter.title = { $in : titles.map((title) => RegExp(`^${title.trim()}`,"i"))};
-        }
-
-        
-        if (req.query.author){     
-            const authors = req.query.author.split(","); 
-            filter.author = { $in : authors.map((authors) => RegExp(`^${authors.trim()}`,"i"))};
-        
-        }
-
-
-        // if (req.query.year){
-        //     filter.year = Number(req.query.year);
-        // }
-
-        
-        if (req.query.genre){
-            filter.genre = RegExp(`^${req.query.genre.trim()}`, "i");
-        }
-
-        // if(Object.keys(filter).length == 0){
-        //     return res.status(400).json({error: "Almeno un filtro è richiesto"});
-        // }
-
-        const library = await libraryCollection.find(filter).toArray();
-
-        if (library.length === 0) {
-            return res.status(404).json({ error: "Nessun risultato trovato" });
+        if (conditions.length === 1) {
+            Object.assign(filter, conditions[0]);
+        } else if (conditions.length > 1) {
+            filter.$and = conditions;
         }
         console.log("Filter finale:", JSON.stringify(filter));
 
+        // .find
+        const library = await libraryCollection.find(filter).toArray();
+        if (library.length === 0) {
+            return res.status(404).json({ error: "Nessun risultato trovato" });
+        }
 
         res.json(library);
 
     } catch (err){
-        next(err)
+        next(err);
     }
 });
 
@@ -225,7 +233,7 @@ app.post("/Users/login", async (req, res, next) => {
 
         const match = await bcrypt.compare(passwd, user.passwd);
 
-        if (!match) return res.status(401).json({success: match});
+        if (!match) return res.status(401).json({ error: "Password errata" });
 
         // dotenv.config();
 
