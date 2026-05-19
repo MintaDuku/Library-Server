@@ -98,9 +98,9 @@ POST /Users/logout    →  refreshToken revoked from DB
 | `POST` | `/Users/refresh` | — | Get a new access token |
 | `POST` | `/Users/logout` | ✅ | Logout, revokes refresh token |
 | `GET` | `/Users` | ✅ Admin | Get all users |
-| `GET` | `/Users/:id` | ✅ | Get a user by ID |
-| `PUT` | `/Users/:id` | ✅ Admin | Update a user |
-| `DELETE` | `/Users/:id` | ✅ Admin | Delete a user |
+| `GET` | `/Users/:code` | ✅ | Get a user by code |
+| `PUT` | `/Users/:code` | ✅ Admin | Update a user |
+| `DELETE` | `/Users/:code` | ✅ Admin | Delete a user |
 
 ### Library
 
