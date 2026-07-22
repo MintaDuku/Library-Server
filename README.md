@@ -60,7 +60,7 @@ node index.js
 
 ```
 library-server/
-├── server.js        # Entry point and routes - Refresh and logout token logic
+├── server.js       # Entry point and routes - Refresh and logout token logic
 ├── db.js           # MongoDB connection
 ├── .env            # Environment variables (do not commit)
 ├── .env.example    # Environment variable template
