@@ -51,7 +51,7 @@ openssl rand -hex 64
 Start the server:
 
 ```bash
-node index.js
+node server.js
 ```
 
 ---
