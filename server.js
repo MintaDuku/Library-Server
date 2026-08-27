@@ -8,7 +8,7 @@ import 'dotenv/config';
 
 const SECRET = process.env.JWT_SECRET ?? "SECRET";
 const PORT = process.env.PORT ?? 3000;
-const REFRESH = process.env.REFRESH_TOKEN ?? "REFRESH";
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? "REFRESH";
 const EXP_ACCESS_TTL = process.env.EXP_ACCESS_TTL ?? "1h";
 const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL ?? "30d";
 
@@ -325,7 +325,7 @@ async function genAccessToken(user) {
 async function genRefreshToken(user) {
     return jwt.sign(
         { userId: user._id },
-        REFRESH,
+        REFRESH_SECRET,
         { expiresIn: EXP_REFRESH_TTL }
     );
 }
@@ -347,7 +347,7 @@ async function refreshAccessToken(req, res) {
         return res.status(403).json({ error: "Invalid refresh token" });
 
     try {
-        const decoded = jwt.verify(refreshToken, REFRESH);
+        const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
         const newAccessToken = await genAccessToken({ _id: decoded.userId });
         res.json({ token: newAccessToken });
     } catch {
