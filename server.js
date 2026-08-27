@@ -9,7 +9,7 @@ import 'dotenv/config';
 const SECRET = process.env.JWT_SECRET ?? "SECRET";
 const PORT = process.env.PORT ?? 3000;
 const REFRESH = process.env.REFRESH_TOKEN ?? "REFRESH";
-const EXP_ACCESS_TTL = process.env.EXP_ACCESS_TTL ?? "30m";
+const EXP_ACCESS_TTL = process.env.EXP_ACCESS_TTL ?? "1h";
 const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL ?? "30d";
 
 const refreshTokenSchema = new mongoose.Schema({
@@ -24,11 +24,11 @@ app.use(express.json());
 app.use(cors());
 
 // Get One-User by id
-app.get("/Users/:id",authServer, requireAdmin,async (req, res, next) => {
+app.get("/Users/:code",authServer, requireAdmin,async (req, res, next) => {
     try {
         console.log("utenti");
         const usersCollection = db.collection("users");
-        const filter = { _id: parseInt(req.params.id) };
+        const filter = { code: parseInt(req.params.code) };
         const users = await usersCollection.findOne(filter);
         res.json(users);
     } catch (err) {
@@ -110,11 +110,11 @@ app.get("/Library", async (req, res, next) => {
 });
 
 // Delete User
-app.delete("/Users/:id",authServer, requireAdmin, async (req, res, next) => {
+app.delete("/Users/:code",authServer, requireAdmin, async (req, res, next) => {
     try {
         console.log("Utenti delete");
         const usersCollection = db.collection("users");
-        const filter = { _id: parseInt(req.params.id) };
+        const filter = { code: parseInt(req.params.code)};
         const result = await usersCollection.deleteOne(filter);
         res.status(200).json({ message: "Successfully deleted one document." });
     } catch (err) {
@@ -181,6 +181,7 @@ app.post("/Users/login", async (req, res, next) => {
         const { email, passwd } = req.body;
         const user = await usersCollection.findOne({ email });
 
+    
         if (!user) return res.status(404).json({ error: "User not found" });
 
         const match = await bcrypt.compare(passwd, user.passwd);
@@ -242,7 +243,7 @@ app.post("/Library", authServer, requireAdmin, async (req, res, next) => {
 app.put("/Users/:id", authServer, requireAdmin,async (req, res, next) => {
     try {
         const usersCollection = db.collection("users");
-        const filter = { _id: parseInt(req.params.id) };
+        const filter = { code: parseInt(req.params.id) };
         const update = {
             $set: {
                 name: req.body.name,
@@ -299,6 +300,7 @@ async function authServer(req, res, next) {
     console.log(req.headers);
     const authHeader = req.headers?.authorization;
     const token = authHeader?.startsWith("Bearer") ? authHeader.split(" ")[1] : null;
+    console.log(token);
     if (!token) return res.status(401).json({ error: "Token missed" });
     try {
         const decoded = jwt.verify(token, SECRET);
