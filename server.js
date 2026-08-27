@@ -6,9 +6,18 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import 'dotenv/config';
 
-const SECRET = process.env.JWT_SECRET ?? "SECRET";
+// Fail fast: never start with missing secrets or DB config
+const REQUIRED_ENV = ["JWT_SECRET", "JWT_REFRESH_SECRET", "DB_URL", "DB_NAME"];
+const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missingEnv.length > 0) {
+    console.error(`Missing required environment variables: ${missingEnv.join(", ")}`);
+    console.error("Copy .env.example to .env and fill it in.");
+    process.exit(1);
+}
+
+const SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT ?? 3000;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? "REFRESH";
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const EXP_ACCESS_TTL = process.env.EXP_ACCESS_TTL ?? "1h";
 const EXP_REFRESH_TTL = process.env.EXP_REFRESH_TTL ?? "30d";
 
